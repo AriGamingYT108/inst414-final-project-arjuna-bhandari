@@ -28,7 +28,7 @@ import numpy as np
 
 def transform_load_data():
     # Step 1: Load raw data (skip the first row with type info)
-    raw_path = 'data/extracted/extracted_data.csv'
+    raw_path = 'data/extracted_data.csv'
     df = pd.read_csv(raw_path, skiprows=1)
 
     # Step 2: Normalize headers
