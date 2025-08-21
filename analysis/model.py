@@ -34,7 +34,7 @@ def model_train():
     - Train and persist two classification models
     """
     # Step 1: Load data
-    df = pd.read_csv('data/extracted/transformed_data.csv')
+    df = pd.read_csv('data/extracted/lending_cleaned.csv')
     # Normalize header names by dropping type suffixes and converting to snake_case
     df.columns = [col.split()[0].strip().lower().replace('.', '_') for col in df.columns]
 

@@ -22,7 +22,7 @@ def evaluate_models():
        a) Logistic Regression  b) XGBoost
     """
     # Step 1: Load transformed data
-    df = pd.read_csv('data/extracted/transformed_data.csv')
+    df = pd.read_csv('data/extracted/lending_cleaned.csv')
     # Normalize header names: drop type suffixes, lowercase, convert to snake_case
     df.columns = [col.split()[0].strip().lower().replace('.', '_') for col in df.columns]
 

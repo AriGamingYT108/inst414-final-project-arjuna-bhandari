@@ -24,24 +24,35 @@ Usage:
 import os
 import pandas as pd
 import numpy as np
+import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 def transform_load_data():
+    logging.info("Starting Transform & Load stage...")
+
     # Step 1: Load raw data (skip the first row with type info)
-    raw_path = 'data/extracted_data.csv'
-    df = pd.read_csv(raw_path, skiprows=1)
+    raw_path = 'data/extracted/lendingclub_apidata.csv'
+    logging.info("Loading raw dataset from %s", raw_path)
+    df = pd.read_csv(raw_path)
 
     # Step 2: Normalize headers
     # Keep only the base name (drop type suffix), trim whitespace,
     # convert to lowercase, and replace periods with underscores
     df.columns = [col.split()[0].strip().lower().replace('.', '_') for col in df.columns]
 
+
     # Step 3: Remove the extraneous header row
     # The first data row duplicates header info, so drop it and reset the index
     df = df.iloc[1:].reset_index(drop=True)
 
+
     # Step 4: Drop exact duplicates
     df = df.drop_duplicates()
+
 
     # Step 5: Drop rows that are completely empty
     df = df.dropna(how='all')
@@ -87,10 +98,11 @@ def transform_load_data():
     # Step 9: Save the transformed data to CSV for analysis stage
     out_dir = 'data/extracted'
     os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, 'transformed_data.csv')
+    out_path = os.path.join(out_dir, 'lending_cleaned.csv')
     df.to_csv(out_path, index=False)
-    print(f"✔ Transformed data saved to {out_path}")
 
+    logging.info("✔ Transformed data saved to %s", out_path)
+    logging.info("Transform & Load stage complete.")
 
 if __name__ == '__main__':
     transform_load_data()
