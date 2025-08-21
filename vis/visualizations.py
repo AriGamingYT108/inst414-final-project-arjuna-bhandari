@@ -28,7 +28,7 @@ def visualize():
     and writes them as PNG files for review.
     """
     # Load the transformed data
-    df = pd.read_csv('data/extracted/transformed_data.csv')
+    df = pd.read_csv('data/extracted/lending_cleaned.csv')
     # Normalize header names to snake_case without suffixes
     df.columns = [col.split()[0].strip().lower().replace('.', '_') for col in df.columns]
 
