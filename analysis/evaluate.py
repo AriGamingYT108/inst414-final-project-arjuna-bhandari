@@ -1,10 +1,14 @@
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix
 import joblib
+import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 def evaluate_models():
     """
@@ -17,7 +21,7 @@ def evaluate_models():
     3. One-hot encode categorical 'purpose' column
     4. Re-create train/test split for evaluation
     5. Scale test features for Logistic Regression
-    6. Load saved modelo artifacts
+    6. Load saved model artifacts
     7. Print classification report, ROC AUC, and confusion matrix for:
        a) Logistic Regression  b) XGBoost
     """
@@ -44,40 +48,35 @@ def evaluate_models():
         stratify=y
     )
 
-    # Step 5: Scale features for Logistic Regression
-    # Fit scaler on training features only
-    scaler = StandardScaler()
-    scaler.fit(X_train)
-    # Apply same transformation to test features
-    X_test_scaled = scaler.transform(X_test)
 
-    # Step 6: Load trained model artifacts
+    # Step 5: Load trained model artifacts
     models_dir = 'data/analysis/models'
     # Logistic Regression saved pipeline
     lr_model = joblib.load(os.path.join(models_dir, 'logistic_regression.pkl'))
     # XGBoost classifier
     xgb_model = joblib.load(os.path.join(models_dir, 'xgboost.pkl'))
 
-    # Step 7a: Evaluate Logistic Regression
-    print("\n=== Logistic Regression Evaluation ===")
-    y_pred_lr = lr_model.predict(X_test_scaled)
-    y_prob_lr = lr_model.predict_proba(X_test_scaled)[:, 1]
+    # Step 6a: Evaluate Logistic Regression
+    logging.info("=== Logistic Regression Evaluation ===")
+    y_pred_lr = lr_model.predict(X_test)
+    y_prob_lr = lr_model.predict_proba(X_test)[:, 1]
     # Print precision, recall, F1-score per class
-    print(classification_report(y_test, y_pred_lr))
+    logging.info("Classification Report (LR):\n%s", classification_report(y_test, y_pred_lr))
     # Print ROC AUC metric
-    print(f"ROC AUC (LR): {roc_auc_score(y_test, y_prob_lr):.4f}")
+    logging.info("ROC AUC (LR): %.4f", roc_auc_score(y_test, y_prob_lr))
     # Print confusion matrix
-    print("Confusion Matrix (LR):")
-    print(confusion_matrix(y_test, y_pred_lr))
+    logging.info("Confusion Matrix (LR):\n%s", confusion_matrix(y_test, y_pred_lr))
 
-    # Step 7b: Evaluate XGBoost (no scaling needed)
-    print("\n=== XGBoost Evaluation ===")
+    # Step 6b: Evaluate XGBoost (no scaling needed)
+    logging.info("=== XGBoost Evaluation ===")
     y_pred_xgb = xgb_model.predict(X_test)
     y_prob_xgb = xgb_model.predict_proba(X_test)[:, 1]
-    print(classification_report(y_test, y_pred_xgb))
-    print(f"ROC AUC (XGB): {roc_auc_score(y_test, y_prob_xgb):.4f}")
-    print("Confusion Matrix (XGB):")
-    print(confusion_matrix(y_test, y_pred_xgb))
+    # Print precision, recall, F1-score per class
+    logging.info("Classification Report (XGB):\n%s", classification_report(y_test, y_pred_xgb))
+    # Print ROC AUC metric
+    logging.info("ROC AUC (XGB): %.4f", roc_auc_score(y_test, y_prob_xgb))
+    # Print confusion matrix
+    logging.info("Confusion Matrix (XGB):\n%s", confusion_matrix(y_test, y_pred_xgb))
 
 
 if __name__ == '__main__':

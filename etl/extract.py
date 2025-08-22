@@ -15,14 +15,14 @@ import numpy as np
 import pandas as pd
 import openml
 import logging
+import time
+
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s"
 )
-
-
 
 def extract_data():
     """
@@ -40,7 +40,23 @@ def extract_data():
 
     # 1. Ensure the output directory exists
     
-    dataset = openml.datasets.get_dataset(43729)
+    attempts, delay = 3, 2
+
+    dataset = None
+    for i in range(attempts):
+        try:
+            dataset = openml.datasets.get_dataset(43729)
+            logging.info("Successfully fetched dataset from OpenML on attempt %d.", i+1)
+
+            break
+        except Exception as e:
+            logging.warning("OpenML fetch failed (attempt %d/%d): %s", i+1, attempts, e)
+            time.sleep(delay)
+
+    if dataset is None:
+        logging.error("Failed to fetch dataset after %d attempts. Aborting extract.", attempts)
+        return
+        
 
     X, y, categorical_indicator, attribute_names = dataset.get_data(
     dataset_format='dataframe',
@@ -60,20 +76,6 @@ def extract_data():
 
     out_path = os.path.join(out_dir, 'lendingclub_apidata.csv')
     df.to_csv(out_path, index=False)
-'''
-    # 2. Load the raw data CSV from the downloads folder
-    raw_path = 'C:/Users/swagm/Downloads/final414data.csv'
-    df_raw = pd.read_csv(raw_path)
-
-    # 3. Display first few rows to verify correct load
-    print("First 5 rows of the raw dataset:")
-    print(df_raw.head())
-
-    # 4. Write the extracted data to the project directory
-    out_path = os.path.join(out_dir, 'extracted_data.csv')
-    df_raw.to_csv(out_path, index=False)
-    print(f"✔ Extracted data saved to {out_path}")
-'''
 
 if __name__ == '__main__':
     extract_data()

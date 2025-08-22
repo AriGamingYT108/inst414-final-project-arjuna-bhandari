@@ -19,9 +19,15 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
 import joblib
+import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 def model_train():
     """
@@ -64,29 +70,27 @@ def model_train():
         X_train[col] = X_train[col].fillna(median_val)
         X_test[col]  = X_test[col].fillna(median_val)
     # Standardize numeric features to mean=0, std=1
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled  = scaler.transform(X_test)
 
-    # Step 6: Train classification models
-    # 6a: Logistic Regression with class balancing
-    lr = LogisticRegression(class_weight='balanced', solver='liblinear', max_iter=1000)
-    lr.fit(X_train_scaled, y_train)
-    print("Trained Logistic Regression.")
+    lr_pipe = Pipeline([
+        ("scaler", StandardScaler()),
+        ("lr", LogisticRegression(class_weight="balanced", solver="liblinear", max_iter=1000))
+    ])
+    lr_pipe.fit(X_train, y_train)
+    logging.info("Trained Logistic Regression.")
 
     # 6b: XGBoost with scale_pos_weight to handle imbalance
     imbalance_ratio = (y_train == 0).sum() / (y_train == 1).sum()
     xgb = XGBClassifier(eval_metric='logloss', scale_pos_weight=imbalance_ratio)
     xgb.fit(X_train, y_train)
-    print("Trained XGBoost.")
+    logging.info("Trained XGBoost.")
 
     # Step 7: Save trained model artifacts
     out_dir = 'data/analysis/models'
     os.makedirs(out_dir, exist_ok=True)
     # Persist Logistic Regression and XGBoost models as .pkl files
-    joblib.dump(lr, os.path.join(out_dir, 'logistic_regression.pkl'))
+    joblib.dump(lr_pipe, os.path.join(out_dir, 'logistic_regression.pkl'))
     joblib.dump(xgb, os.path.join(out_dir, 'xgboost.pkl'))
-    print(f"✔ Models saved to {out_dir}")
+    logging.info("✔ Models saved to %s", out_dir)
 
 
 if __name__ == '__main__':
