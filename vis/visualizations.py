@@ -20,7 +20,12 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 def visualize():
     """
@@ -119,7 +124,8 @@ def visualize():
     plt.savefig(os.path.join(vis_dir, 'installment_distribution.png'))
     plt.close()
 
-    print(f"Selected visualizations saved to {vis_dir}")
+    logging.info("All visualizations saved to %s", vis_dir)
+
 
 
 if __name__ == '__main__':

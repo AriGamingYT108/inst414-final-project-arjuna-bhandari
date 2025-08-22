@@ -37,8 +37,19 @@ def transform_load_data():
     # Step 1: Load raw data (skip the first row with type info)
     raw_path = 'data/extracted/lendingclub_apidata.csv'
     logging.info("Loading raw dataset from %s", raw_path)
-    df = pd.read_csv(raw_path)
 
+    try:
+        df = pd.read_csv(raw_path)
+        logging.info("Successfully loaded raw dataset from %s. Shape: %s", raw_path, df.shape)
+    except FileNotFoundError:
+        logging.error("Raw dataset not found at %s. Run extract first.", raw_path)
+        return
+    except pd.errors.EmptyDataError:
+        logging.error("Raw dataset at %s is empty.", raw_path)
+        return
+    except Exception as e:
+        logging.exception("Failed reading raw dataset: %s", e)
+        return
     # Step 2: Normalize headers
     # Keep only the base name (drop type suffix), trim whitespace,
     # convert to lowercase, and replace periods with underscores
