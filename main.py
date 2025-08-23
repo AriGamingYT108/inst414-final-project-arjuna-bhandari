@@ -8,11 +8,10 @@ from vis.visualizations import visualize
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,  # you can change to DEBUG for more details
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler()  # log to console
-        # You can add logging.FileHandler("pipeline.log") if you want logs in a file
     ]
 )
 
